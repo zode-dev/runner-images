@@ -74,7 +74,7 @@ scripts/parity.sh --manifest m.json ci-ubuntu-24.04   # a local software report
 ## zode-ci in the image
 
 `ci-ubuntu-24.04` has an install hook for `zode-ci`, the test wrapper from
-zodeops/zoded (`cmd/zode-ci`). It is off while `ARG ZODE_CI_URL` is empty.
+zode-dev/zoded (`cmd/zode-ci`). It is off while `ARG ZODE_CI_URL` is empty.
 To ship a release, set `ZODE_CI_URL` to
 `https://api.zode.dev/dl/zode-ci-linux-amd64` and `ZODE_CI_SHA256` to its line
 in `https://api.zode.dev/dl/SHA256SUMS` in `Dockerfile.in`, render and merge:

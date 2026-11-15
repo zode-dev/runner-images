@@ -94,13 +94,13 @@ ARG ANSIBLE_CORE_VERSION=2.21.6
 ARG RUSTUP_VERSION=1.29.3
 ARG RUSTUP_SHA256=b1c8cb14e30889e7e2999e6b69e62d9e9b9ffc0f4df8180564d306d9680e6c55
 ARG RUST_TOOLCHAIN=stable
-# zode-ci, the test wrapper (zodeops/zoded cmd/zode-ci): one pinned build,
+# zode-ci, the test wrapper (zode-dev/zoded cmd/zode-ci): one pinned build,
 # released in this repository as zode-ci/<zoded commit> with its checksums,
 # so an image always carries the same binary. Bump both lines together.
 # The control plane still swaps in its own build at job start when the API's
 # differs (zoded docs/zode-ci-interface.md), since the selection protocol
 # moves with the API.
-ARG ZODE_CI_URL=https://github.com/zodeops/runner-images/releases/download/zode-ci/027b609/zode-ci-linux-amd64
+ARG ZODE_CI_URL=https://github.com/zode-dev/runner-images/releases/download/zode-ci/027b609/zode-ci-linux-amd64
 ARG ZODE_CI_SHA256=d92eda8e0298a1bb32b7cc3130c2bbbfc473de61fd507fcd81fb44989fffa653
 
 ENV ImageOS=ubuntu24 \
@@ -422,7 +422,7 @@ ENV CARGO_HOME=/home/runner/.cargo \
 # The `runner` user: uid 1001, primary group docker, passwordless sudo,
 # HOME /home/runner, work folder /home/runner/work, like GitHub's hosted
 # runners. Zode starts the job as this user when the image has it
-# (docs/ci-contract.md in zodeops/zoded). Then rustup, GitHub's PATH order
+# (docs/ci-contract.md in zode-dev/zoded). Then rustup, GitHub's PATH order
 # and kernel settings, and a tool cache and npm globals the user can write.
 RUN <<'ZODE_STEP'
 set -euxo pipefail
