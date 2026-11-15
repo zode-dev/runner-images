@@ -1,6 +1,6 @@
 # ci-ubuntu-24.04
 
-Use it with `zode/ci-ubuntu-24.04`. Version 20261113.15, published 2026-11-13 from commit [70bc261](https://github.com/zodeops/runner-images/tree/70bc2616ba86f07c15b104392548eacf5fff695c/images/ci-ubuntu-24.04).
+Use it with `zode/ci-ubuntu-24.04`. Version 20261113.15, published 2026-11-13 from commit [70bc261](https://github.com/zode-dev/runner-images/tree/70bc2616ba86f07c15b104392548eacf5fff695c/images/ci-ubuntu-24.04).
 Sizes: 2x4, 4x8, 8x16, 16x32.
 
 Operating system: Ubuntu 24.04.5 LTS.

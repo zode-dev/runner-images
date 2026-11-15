@@ -1,6 +1,6 @@
 # base
 
-Use it with `zode/base`. Version 20261112.4, published 2026-11-12 from commit [0e1882c](https://github.com/zodeops/runner-images/tree/0e1882c4435cbcf92c2028aa24e1f06e60868f04/images/base).
+Use it with `zode/base`. Version 20261112.4, published 2026-11-12 from commit [0e1882c](https://github.com/zode-dev/runner-images/tree/0e1882c4435cbcf92c2028aa24e1f06e60868f04/images/base).
 Sizes: 2x4, 4x8, 8x16, 16x32.
 
 Operating system: Ubuntu 24.04.5 LTS.

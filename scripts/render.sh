@@ -15,7 +15,7 @@ REPORT=scripts/software-report.sh
 STEP_MARK=ZODE_STEP
 FILE_MARK=ZODE_SOFTWARE_REPORT
 
-# Zode's limits for a Dockerfile (docs/custom-images.md in zodeops/zoded).
+# Zode's limits for a Dockerfile (docs/custom-images.md in zode-dev/zoded).
 MAX_BYTES=$((64 * 1024))
 MAX_STEP_BYTES=$((16 * 1024))
 MAX_STEPS=200

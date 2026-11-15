@@ -41,7 +41,7 @@ cat > /usr/local/bin/zode-software-report <<'ZODE_SOFTWARE_REPORT'
 # Prints the software in this image as one line:
 #   ZODE-MANIFEST {"os":"...","groups":[...],"env":{...}}
 # The control plane stores that JSON on the release (docs/official-images.md
-# in zodeops/zoded). A tool that is not installed is left out, never an error.
+# in zode-dev/zoded). A tool that is not installed is left out, never an error.
 #
 # Single source: scripts/render.sh copies this file into every Dockerfile,
 # which installs it as /usr/local/bin/zode-software-report.

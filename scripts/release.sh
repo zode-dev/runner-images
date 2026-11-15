@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Creates a release of one line on Zode and follows it until it is published
 # or failed. Runs in the publish workflow on main: the API only takes a
-# GitHub Actions OIDC token from zodeops/runner-images at refs/heads/main.
+# GitHub Actions OIDC token from zode-dev/runner-images at refs/heads/main.
 #
 #   scripts/release.sh LINE VERSION
 #
