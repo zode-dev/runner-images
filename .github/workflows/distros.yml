@@ -5,10 +5,10 @@ name: distros
 #    (scripts/refresh-pins.sh) and opens or updates one pull request with it;
 #  - says when a new Fedora or Alpine release is out (a new line);
 #  - with the repository variable WEEKLY_UBUNTU_RELEASE=1, republishes
-#    ubuntu-24.04 so its security-upgrade step runs again.
-# Distro lines build on the nodes with scripts/build-base.sh; every build
-# runs the distro's full upgrade, so it ships the week's fixes even when the
-# pin did not move.
+#    ubuntu-24.04 so its security-upgrade step runs again;
+#  - with WEEKLY_DISTRO_RELEASE=1, republishes every distro line: each
+#    build runs the distro's full upgrade, so it ships the week's fixes even
+#    when the pin did not move.
 
 on:
   schedule:
@@ -66,3 +66,19 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run publish.yml --repo "$GITHUB_REPOSITORY" --ref main -f line=ubuntu-24.04
+
+  distro-lines:
+    if: vars.WEEKLY_DISTRO_RELEASE == '1'
+    runs-on: zode-2x4
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Republish the distro lines
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for conf in images/*/line.conf; do
+            line=$(basename "$(dirname "$conf")")
+            echo "publish $line"
+            gh workflow run publish.yml --repo "$GITHUB_REPOSITORY" --ref main -f line="$line"
+          done

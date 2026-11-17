@@ -99,10 +99,12 @@ the step installs it at `/usr/local/bin/zode-ci` and runs
 
 ## How a release works
 
-1. A push to `main` that changes `images/<line>/Dockerfile` starts the
+1. A push to `main` that changes `images/<line>/Dockerfile` (or a distro
+   line's `line.conf` or `provision.sh`) starts the
    [publish workflow](.github/workflows/publish.yml) for that line. A change
-   to `scripts/software-report.sh` releases every line. A maintainer can
-   also run it by hand for one line or all of them.
+   to `scripts/software-report.sh` releases every line, one to
+   `scripts/guest/` every distro line. A maintainer can also run it by hand
+   for one line or all of them.
 2. The workflow sends the Dockerfile to `POST /v1/official/releases`,
    signed with its GitHub OIDC token. Only this repository's `main` branch
    is accepted. The version is `YYYYMMDD.<run number>`.
@@ -176,10 +178,14 @@ kernel, waits for the agent and snapshots disk and RAM, like
 golden as `manifest.json`. `SLOT=<n>` builds several lines on one node at
 once.
 
-Distro lines have no Dockerfile, so the publish workflow does not send them
-to `POST /v1/official/releases` (that path builds `FROM zode`). Until the
-control plane takes a line recipe and builds it once per node (task 72),
-a release of a distro line is a `build-base.sh` run per node.
+The publish workflow releases a distro line as a recipe: `scripts/release.sh`
+sends `POST /v1/official/releases` with `recipe` (the cloud image pin and
+init from `line.conf`, `provision.sh` and the shared guest scripts) instead
+of a `dockerfile`. Every node on a growable base with the `recipe_images`
+feature builds it the way `build-base.sh` does (zoded
+`internal/zoded/recipe.go`), once, at the smallest size, and serves it at
+every size; nodes still on per-size goldens skip it. `build-base.sh` stays
+for drills and for building a line by hand on one node.
 
 Every Monday the [distros workflow](.github/workflows/distros.yml) moves
 each pin to its project's newest cloud image (`scripts/refresh-pins.sh`)

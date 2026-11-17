@@ -40,6 +40,9 @@ jobs:
       - name: Check the rendered Dockerfiles
         run: scripts/render.sh --check
 
+      - name: Check the distro lines
+        run: scripts/check-distros.sh
+
       - name: Pick the lines to release
         id: lines
         env:
@@ -48,7 +51,8 @@ jobs:
           BEFORE: ${{ github.event.before }}
           AFTER: ${{ github.sha }}
         run: |
-          all=$(find images -mindepth 2 -maxdepth 2 -name Dockerfile | cut -d/ -f2 | sort)
+          # Dockerfile lines and distro lines (line.conf, built from a recipe).
+          all=$(find images -mindepth 2 -maxdepth 2 \( -name Dockerfile -o -name line.conf \) | cut -d/ -f2 | sort -u)
           if [ "$EVENT" = workflow_dispatch ]; then
             if [ -z "$INPUT_LINE" ]; then
               lines=$all
@@ -67,9 +71,14 @@ jobs:
               # The report is inlined in every Dockerfile.
               lines=$all
             else
-              # Only a change to a line's Dockerfile builds it; its README
-              # is written by this workflow.
-              lines=$(printf '%s\n' "$changed" | sed -nE 's#^images/([^/]+)/Dockerfile(\.in)?$#\1#p' | sort -u)
+              # Only a change to a line's Dockerfile, or a distro line's
+              # line.conf or provision.sh, builds it; its README is written
+              # by this workflow. The distro lines' shared guest scripts go
+              # into every distro line's recipe.
+              lines=$(printf '%s\n' "$changed" | sed -nE 's#^images/([^/]+)/(Dockerfile(\.in)?|line\.conf|provision\.sh)$#\1#p' | sort -u)
+              if printf '%s\n' "$changed" | grep '^scripts/guest/' >/dev/null; then
+                lines=$(printf '%s\n%s\n' "$lines" "$(find images -mindepth 2 -maxdepth 2 -name line.conf | cut -d/ -f2)" | sort -u)
+              fi
             fi
           fi
           # A line with a HOLD file is only released when named by hand
