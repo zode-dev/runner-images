@@ -37,6 +37,16 @@ set -euxo pipefail
 # release, 17 Nov 2026, timed out on it): every apt call waits for the lock
 # instead of failing. Kept in the image, where it only makes apt patient.
 printf 'DPkg::Lock::Timeout "600";\n' > /etc/apt/apt.conf.d/90zode-lock-timeout
+# Waiting is not enough on the official-release path: the step then sat
+# behind unattended-upgrades for minutes and the build VM's agent stream
+# dropped (17 Nov 2026, runs 44058966673 and 44059730392). Stop the apt
+# timers and unattended-upgrades for good, as ci-ubuntu-24.04 does, and wait
+# for a run already going. A phone image has no use for them.
+systemctl stop apt-daily.timer apt-daily-upgrade.timer apt-daily.service apt-daily-upgrade.service \
+  unattended-upgrades.service 2>/dev/null || true
+systemctl mask apt-daily.service apt-daily-upgrade.service apt-daily.timer apt-daily-upgrade.timer \
+  unattended-upgrades.service
+for _ in $(seq 300); do pgrep -x 'apt-get|apt|unattended-upgr|dpkg' >/dev/null || break; sleep 2; done
 
 # Android 15 (redroid 15.0.0-250627, x86_64 + x86). Android 16 (16.0.0-250627,
 # sha256:d89f5204...) was tried on 17 Nov 2026 and does not boot with software
@@ -171,9 +181,15 @@ NOTICE
 # --- 4. The screen up before the freeze ---------------------------------------
 # zode-desktop serves the phone when /etc/zode/android.json exists; switching
 # the desktop on here keeps Xvfb, scrcpy and voxl running in the snapshot.
-if [ -x /usr/local/lib/zode/zode-desktop ]; then
-  /usr/local/lib/zode/zode-desktop enable desktop
-  /usr/local/lib/zode/zode-desktop android status
+# A node whose zode-desktop predates the phone (no `android` verb) skips
+# this: the screen then comes up on the first `zode desktop` instead of
+# being frozen up, which only costs start time.
+H=/usr/local/lib/zode/zode-desktop
+if [ -x "$H" ] && { "$H" 2>&1 || true; } | grep -q 'android VERB'; then
+  "$H" enable desktop
+  "$H" android status
+else
+  echo "zode-desktop here has no android support; the screen starts on first use"
 fi
 # Warm the pages a new sandbox touches first.
 cat /opt/scrcpy/* /usr/bin/adb >/dev/null 2>&1 || true
