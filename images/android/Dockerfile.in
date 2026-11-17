@@ -10,7 +10,10 @@ FROM zode
 # Set by the publish workflow to the release version (YYYYMMDD.run).
 ARG IMAGE_VERSION=dev
 
-ENV ZODE_IMAGE_VERSION=${IMAGE_VERSION}
+ENV ZODE_IMAGE_VERSION=${IMAGE_VERSION} \
+    JAVA_HOME=/usr/lib/jvm/temurin-21-jdk-amd64 \
+    ANDROID_HOME=/usr/local/lib/android/sdk \
+    ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
 
 # setup.sh, inlined by scripts/render.sh. It loads the binder module and mounts
 # binderfs: this is a VM, not a container.

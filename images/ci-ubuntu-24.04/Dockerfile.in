@@ -68,6 +68,11 @@ ARG MAVEN_VERSION=3.10.0
 ARG MAVEN_SHA512=908b1501bfb420bf7c8affb855534a9c407fd6099367bfb9f2f2dcb8e9799102bffb84518cde74c679bd76870247c6528683abdd620581bffa90f95d92d175aa
 ARG GRADLE_VERSION=9.9.1
 ARG GRADLE_SHA256=d8a18a7a841dd5df825d35a685fad6f2d7f12ac0c280e57b67c27b4a520ba228
+# Android SDK, as GitHub's ubuntu-24.04 (toolset-2404.json "android"):
+# command-line tools pinned like GitHub's, the packages pinned by exact id
+# (sdkmanager checks each archive against Google's repository manifest).
+ARG SDK_CMDLINE_TOOLS=commandlinetools-linux-11076708_latest.zip
+ARG SDK_CMDLINE_TOOLS_SHA256=2d2d50857e4eb553af5a6dc3ad507a17adf43d115264b1afc116f95c92e5e258
 # PowerShell (`shell: pwsh`), from its GitHub release.
 ARG PWSH_VERSION=7.6.10
 ARG PWSH_SHA256=81a5a944702b116ea74c88b01ba5f1f46b1cd7c42c36d85e1bae90de1230b4d1
@@ -113,6 +118,12 @@ ENV ImageOS=ubuntu24 \
     JAVA_HOME_21_X64=/usr/lib/jvm/temurin-21-jdk-amd64 \
     JAVA_HOME_25_X64=/usr/lib/jvm/temurin-25-jdk-amd64 \
     JAVA_HOME=/usr/lib/jvm/temurin-17-jdk-amd64 \
+    ANDROID_HOME=/usr/local/lib/android/sdk \
+    ANDROID_SDK_ROOT=/usr/local/lib/android/sdk \
+    ANDROID_NDK=/usr/local/lib/android/sdk/ndk/27.3.13750724 \
+    ANDROID_NDK_HOME=/usr/local/lib/android/sdk/ndk/27.3.13750724 \
+    ANDROID_NDK_ROOT=/usr/local/lib/android/sdk/ndk/27.3.13750724 \
+    ANDROID_NDK_LATEST_HOME=/usr/local/lib/android/sdk/ndk/30.0.16248370 \
     GOROOT_1_24_X64=/opt/hostedtoolcache/go/${GO_124_VERSION}/x64 \
     GOROOT_1_25_X64=/opt/hostedtoolcache/go/${GO_125_VERSION}/x64 \
     GOROOT_1_26_X64=/opt/hostedtoolcache/go/${GO_126_VERSION}/x64 \
@@ -289,6 +300,46 @@ unzip -q -o -d /usr/share /tmp/gradle.zip
 ln -sfn "/usr/share/gradle-${GRADLE_VERSION}" /usr/share/gradle
 ln -sf /usr/share/gradle/bin/gradle /usr/local/bin/gradle
 rm -f /tmp/maven.tar.gz /tmp/gradle.zip
+ZODE_STEP
+
+# The Android SDK where GitHub's image has it (/usr/local/lib/android/sdk,
+# ANDROID_HOME and ANDROID_SDK_ROOT), with what its toolset lists: every
+# stable platform from 34, build-tools from 34.0.0, NDK 27 (the default),
+# 29 and 30, CMake 3.31.5 and 4.1.2, the m2 repositories, Play services and
+# platform-tools; licences accepted, as on GitHub. Writable by jobs.
+RUN <<'ZODE_STEP'
+set -euxo pipefail
+dl() { curl -fsSL --retry 6 --retry-delay 5 --retry-all-errors --connect-timeout 20 -o "$2" "$1"; }
+mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
+dl "https://dl.google.com/android/repository/$SDK_CMDLINE_TOOLS" /tmp/cmdline-tools.zip
+echo "$SDK_CMDLINE_TOOLS_SHA256  /tmp/cmdline-tools.zip" | sha256sum -c -
+rm -rf "$ANDROID_SDK_ROOT/cmdline-tools/latest" /tmp/cmdline-tools
+unzip -q /tmp/cmdline-tools.zip -d /tmp
+mv /tmp/cmdline-tools "$ANDROID_SDK_ROOT/cmdline-tools/latest"
+rm -f /tmp/cmdline-tools.zip
+sdkmanager=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager
+# (yes from a process substitution: under pipefail its SIGPIPE would fail a pipe)
+"$sdkmanager" --licenses >/dev/null < <(yes)
+pkgs=(
+  "platforms;android-34" "platforms;android-34-ext8" "platforms;android-34-ext10" "platforms;android-34-ext11"
+  "platforms;android-34-ext12" "platforms;android-35" "platforms;android-35-ext14" "platforms;android-35-ext15"
+  "platforms;android-36" "platforms;android-36-ext18" "platforms;android-36-ext19" "platforms;android-36.1"
+  "platforms;android-37.0" "platforms;android-37.1" "platforms;android-37.2" "platforms;android-37.2-beta1"
+  "platforms;android-37.2-beta2" "platforms;android-37.2-beta3"
+  "build-tools;34.0.0" "build-tools;35.0.0" "build-tools;35.0.1" "build-tools;36.0.0" "build-tools;36.1.0" "build-tools;37.0.0"
+  "ndk;27.3.13750724" "ndk;29.0.14206865" "ndk;30.0.16248370"
+  "cmake;3.31.5" "cmake;4.1.2"
+  "extras;android;m2repository" "extras;google;m2repository" "extras;google;google_play_services"
+  "platform-tools"
+)
+for i in 1 2 3; do "$sdkmanager" --install "${pkgs[@]}" >/tmp/sdkmanager.log 2>&1 < <(yes) && break; tail -20 /tmp/sdkmanager.log; sleep $((i * 15)); done
+for p in "${pkgs[@]}"; do
+  [ -f "$ANDROID_SDK_ROOT/${p//;//}/source.properties" ] || { echo "missing $p" >&2; exit 1; }
+done
+"$ANDROID_SDK_ROOT/platform-tools/adb" version
+test -x "$ANDROID_NDK/ndk-build"
+rm -rf /tmp/sdkmanager.log /root/.android/cache "$ANDROID_SDK_ROOT/.temp"
+chmod -R a+rwX /usr/local/lib/android
 ZODE_STEP
 
 # Node.js, Python and Go in the hosted tool cache, laid out the way
@@ -491,7 +542,8 @@ if [ -d /opt/zode-runner ]; then
   for n in ImageOS ImageVersion RUNNER_TOOL_CACHE AGENT_TOOLSDIRECTORY JAVA_HOME \
     JAVA_HOME_8_X64 JAVA_HOME_11_X64 JAVA_HOME_17_X64 JAVA_HOME_21_X64 JAVA_HOME_25_X64 \
     GOROOT_1_24_X64 GOROOT_1_25_X64 GOROOT_1_26_X64 CHROMEWEBDRIVER GECKOWEBDRIVER \
-    SELENIUM_JAR_PATH ACCEPT_EULA CARGO_HOME RUSTUP_HOME; do
+    SELENIUM_JAR_PATH ACCEPT_EULA CARGO_HOME RUSTUP_HOME ANDROID_HOME ANDROID_SDK_ROOT \
+    ANDROID_NDK ANDROID_NDK_HOME ANDROID_NDK_ROOT ANDROID_NDK_LATEST_HOME; do
     sed -i "/^$n=/d" /opt/zode-runner/.env
     echo "$n=${!n}" >>/opt/zode-runner/.env
   done
@@ -513,7 +565,7 @@ RUN <<'ZODE_STEP'
 set -euxo pipefail
 pw=${PLAYWRIGHT_BROWSERS_PATH:-/ms-playwright}
 mkdir -p "$pw"
-writable=(/opt /usr/share /usr/lib/jvm "$pw")
+writable=(/opt /usr/share /usr/lib/jvm /usr/local/lib/android "$pw")
 find "${writable[@]}" -xdev \( -type d -o -type f \) ! -perm /6000 -exec chmod a+rwX {} +
 check=("${writable[@]}" "$RUNNER_TOOL_CACHE" /opt/pipx /usr/local/lib/node_modules /usr/local/bin)
 shopt -s nullglob

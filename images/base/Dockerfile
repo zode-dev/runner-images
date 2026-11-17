@@ -268,6 +268,41 @@ if have dpkg-query; then
   done
 fi
 
+# Android SDK, with the row names of GitHub's report.
+SDK=${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}
+if [ -n "$SDK" ] && [ -d "$SDK" ]; then
+  G="Android"
+  # rev DIR: Pkg.Revision of an installed SDK package.
+  rev() { sed -n 's/^Pkg\.Revision=//p' "$1/source.properties" 2>/dev/null | head -n1; }
+  # list GLOB [FORMAT]: the installed packages under GLOB, newest first.
+  list() {
+    local d out=()
+    for d in $1; do
+      [ -f "$d/source.properties" ] || continue
+      out+=("$(basename "$d")")
+    done
+    [ ${#out[@]} -gt 0 ] || return 0
+    printf '%s\n' "${out[@]}" | sort -rV | paste -sd, - | sed 's/,/, /g'
+  }
+  add "$G" "Android Command Line Tools" "$(rev "$SDK/cmdline-tools/latest")"
+  add "$G" "Android SDK Build-tools" "$(list "$SDK/build-tools/*")"
+  plats=$(for d in "$SDK"/platforms/*; do
+    [ -f "$d/source.properties" ] && printf '%s (rev %s)\n' "$(basename "$d")" "$(rev "$d")"
+  done | sort -rV | paste -sd, - | sed 's/,/, /g')
+  add "$G" "Android SDK Platforms" "$plats"
+  add "$G" "Android SDK Platform-Tools" "$(rev "$SDK/platform-tools")"
+  ndk=$(list "$SDK/ndk/*")
+  if [ -n "$ndk" ] && [ -n "${ANDROID_NDK:-}" ]; then
+    def=$(basename "$ANDROID_NDK")
+    ndk=$(printf '%s' "$ndk" | sed "s/\b$def\b/$def (default)/")
+  fi
+  add "$G" "Android NDK" "$ndk"
+  add "$G" "Android CMake" "$(list "$SDK/cmake/*")"
+  add "$G" "Android Support Repository" "$(rev "$SDK/extras/android/m2repository")"
+  add "$G" "Android Google Repository" "$(rev "$SDK/extras/google/m2repository")"
+  add "$G" "Android Google Play services" "$(rev "$SDK/extras/google/google_play_services")"
+fi
+
 # Environment worth knowing, when set.
 ENV_JSON=$(jq -n '$ENV | with_entries(select(.key | test(
   "^(ImageOS|ImageVersion|ZODE_IMAGE_VERSION|RUNNER_TOOL_CACHE|AGENT_TOOLSDIRECTORY|JAVA_HOME|JAVA_HOME_[0-9]+_X64|GOROOT_[0-9_]+_X64|PLAYWRIGHT_BROWSERS_PATH|CHROME_PATH|CHROMEWEBDRIVER|GECKOWEBDRIVER|EDGEWEBDRIVER|SELENIUM_JAR_PATH|CONDA|VCPKG_INSTALLATION_ROOT|ANDROID_[A-Z_]+|ACCEPT_EULA|XDG_CONFIG_HOME|CARGO_HOME|RUSTUP_HOME|PIPX_HOME|PIPX_BIN_DIR|ANT_HOME|GRADLE_HOME|M2_HOME|POWERSHELL_DISTRIBUTION_CHANNEL)$")))')

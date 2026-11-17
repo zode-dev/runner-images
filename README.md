@@ -12,10 +12,10 @@ and in every size, and publishes all of them at once.
 
 | Line | Used by | What it adds to the Zode base image |
 | --- | --- | --- |
-| [`ci-ubuntu-24.04`](images/ci-ubuntu-24.04) | every CI job (`runs-on: zode-*`) | what GitHub's `ubuntu-24.04` carries that common actions and workflows use: the hosted tool cache (Node.js 22 and 24, Python 3.11 to 3.15, Go 1.24 to 1.26, Temurin 8 to 25), Maven, Gradle, PowerShell, Azure, Google Cloud and AWS CLIs, Kubernetes tools, Firefox and the browser drivers, rustup, a `runner` user with passwordless sudo, Zode's `zode-ci` test wrapper, GitHub's apt package list and kernel settings; PostgreSQL, MySQL and Redis installed but stopped. What still differs is in [PARITY.md](images/ci-ubuntu-24.04/PARITY.md) |
+| [`ci-ubuntu-24.04`](images/ci-ubuntu-24.04) | every CI job (`runs-on: zode-*`) | what GitHub's `ubuntu-24.04` carries that common actions and workflows use: the hosted tool cache (Node.js 22 and 24, Python 3.11 to 3.15, Go 1.24 to 1.26, Temurin 8 to 25), the Android SDK at GitHub's path (`ANDROID_HOME`, cmdline-tools, platforms 34 to 37.2, build-tools 34 to 37, NDK 27/29/30, CMake, platform-tools), Maven, Gradle, PowerShell, Azure, Google Cloud and AWS CLIs, Kubernetes tools, Firefox and the browser drivers, rustup, a `runner` user with passwordless sudo, Zode's `zode-ci` test wrapper, GitHub's apt package list and kernel settings; PostgreSQL, MySQL and Redis installed but stopped. What still differs is in [PARITY.md](images/ci-ubuntu-24.04/PARITY.md) |
 | [`base`](images/base) | sandboxes that ask for `zode/base` | zstd, Git LFS, yq; PostgreSQL and Redis keep running |
 | [`ubuntu-24.04`](images/ubuntu-24.04) | `zode/ubuntu-24.04`, and old size names | nothing but the security updates since the base was built |
-| [`android`](images/android) | sandboxes that ask for `zode/android` (held, not released yet) | Android (AOSP x86_64/x86 in a container, redroid), adb and scrcpy; its screen is the sandbox desktop. No Google Play, no ARM translation |
+| [`android`](images/android) | sandboxes that ask for `zode/android` (held, not released yet) | Android (AOSP x86_64/x86 in a container, redroid), adb and scrcpy; its screen is the sandbox desktop. Temurin 21 and the Android SDK (platforms and build-tools 35/36) to build an app and install it on the phone in one sandbox. No Google Play, no ARM translation |
 
 The Linux distro lines (REQ-084) are built from each distro's own cloud
 image, not from the Zode base, so they are a different kind of line (see
@@ -143,8 +143,10 @@ Lines build `FROM zode`, so each step runs in a Zode VM, not in a container:
   the one `ZODE-MANIFEST {...}` line Zode stores with the release.
 - Pull requests run [check](.github/workflows/check.yml): shellcheck,
   the render check, hadolint, actionlint and a smoke test of the report.
-- Keep the images lean. Large toolchains (Android, .NET, Haskell, Swift)
-  belong in a workspace's own custom image, not here.
+- Keep the images lean. Large toolchains (.NET, Haskell, Swift)
+  belong in a workspace's own custom image, not here. The Android SDK is the
+  exception (owner, 17 Nov 2026): `ci-ubuntu-24.04` carries GitHub's layout
+  (12 GB) and `android` the pieces for `./gradlew assembleDebug`.
 
 To add a line, create `images/<name>/Dockerfile.in`, render it, and merge.
 The name must match `^[a-z0-9][a-z0-9.-]{0,40}$`.

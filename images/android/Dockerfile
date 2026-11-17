@@ -11,7 +11,10 @@ FROM zode
 # Set by the publish workflow to the release version (YYYYMMDD.run).
 ARG IMAGE_VERSION=dev
 
-ENV ZODE_IMAGE_VERSION=${IMAGE_VERSION}
+ENV ZODE_IMAGE_VERSION=${IMAGE_VERSION} \
+    JAVA_HOME=/usr/lib/jvm/temurin-21-jdk-amd64 \
+    ANDROID_HOME=/usr/local/lib/android/sdk \
+    ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
 
 # setup.sh, inlined by scripts/render.sh. It loads the binder module and mounts
 # binderfs: this is a VM, not a container.
@@ -27,6 +30,8 @@ RUN <<'ZODE_STEP'
 #   - binder_linux.ko for the running kernel, loaded at boot (the kernel
 #     variant: only this image has it), binderfs on /dev/binderfs
 #   - adb (Ubuntu's, built from AOSP source) and scrcpy (Apache-2.0)
+#   - Temurin 21 and the Android SDK (platforms 35/36, build-tools 35/36,
+#     platform-tools) at /usr/local/lib/android/sdk for ./gradlew assembleDebug
 #   - Docker container zode-android: redroid pinned by digest, booted,
 #     unlocked, awake, animations off
 #   - /etc/zode/android.json: what zode-desktop reads to serve the phone
@@ -58,6 +63,15 @@ SCRCPY_VERSION="${SCRCPY_VERSION:-5.0.1}"
 SCRCPY_SHA256="${SCRCPY_SHA256:-9f969d30cc574816077edecda65719c1c70b0aee1df1ba5fa00779ac07b8fd6e}"
 WIDTH=720 HEIGHT=1280 DPI=320
 SERIAL=127.0.0.1:5555
+# Building apps here: Temurin 21 and the Android SDK at GitHub's path (the
+# same pins as ci-ubuntu-24.04), with what ./gradlew assembleDebug needs for
+# a compileSdk 35 or 36 app.
+TEMURIN_21_VERSION="${TEMURIN_21_VERSION:-21.0.13+9}"
+TEMURIN_21_SHA256="${TEMURIN_21_SHA256:-d7f5d5cf865a2902b70ff549b97586a7d3f234e016f041ab447ea740c7d66d1c}"
+SDK_CMDLINE_TOOLS="${SDK_CMDLINE_TOOLS:-commandlinetools-linux-11076708_latest.zip}"
+SDK_CMDLINE_TOOLS_SHA256="${SDK_CMDLINE_TOOLS_SHA256:-2d2d50857e4eb553af5a6dc3ad507a17adf43d115264b1afc116f95c92e5e258}"
+SDK=/usr/local/lib/android/sdk
+JDK=/usr/lib/jvm/temurin-21-jdk-amd64
 
 retry() { local i; for i in 1 2 3 4 5 6; do "$@" && return 0; sleep $((i * 5)); done; return 1; }
 
@@ -113,6 +127,43 @@ SH
 [ -x /opt/scrcpy/scrcpy_bin ] || mv /opt/scrcpy/scrcpy /opt/scrcpy/scrcpy_bin
 chmod 0755 /usr/local/bin/scrcpy
 scrcpy --version
+
+# --- 2b. JDK and Android SDK for building apps -------------------------------
+dl() { curl -fsSL --retry 6 --retry-delay 5 --retry-all-errors --connect-timeout 20 -o "$2" "$1"; }
+v=$TEMURIN_21_VERSION
+dl "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-${v//+/%2B}/OpenJDK21U-jdk_x64_linux_hotspot_${v/+/_}.tar.gz" /tmp/jdk.tar.gz
+echo "$TEMURIN_21_SHA256  /tmp/jdk.tar.gz" | sha256sum -c -
+rm -rf "$JDK" && mkdir -p "$JDK"
+tar -xzf /tmp/jdk.tar.gz -C "$JDK" --strip-components=1
+rm -f /tmp/jdk.tar.gz
+for b in java javac jar keytool; do ln -sf "$JDK/bin/$b" "/usr/local/bin/$b"; done
+"$JDK/bin/java" -version 2>&1 | grep "\"${v%+*}\"" >/dev/null
+
+dl "https://dl.google.com/android/repository/$SDK_CMDLINE_TOOLS" /tmp/cmdline-tools.zip
+echo "$SDK_CMDLINE_TOOLS_SHA256  /tmp/cmdline-tools.zip" | sha256sum -c -
+rm -rf "$SDK/cmdline-tools/latest" /tmp/cmdline-tools && mkdir -p "$SDK/cmdline-tools"
+unzip -q /tmp/cmdline-tools.zip -d /tmp
+mv /tmp/cmdline-tools "$SDK/cmdline-tools/latest"
+rm -f /tmp/cmdline-tools.zip
+sdkm() { JAVA_HOME=$JDK "$SDK/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK" "$@" < <(yes); }
+sdkm --licenses >/dev/null
+pkgs=("platforms;android-35" "platforms;android-36" "build-tools;35.0.0" "build-tools;36.0.0" "platform-tools")
+for i in 1 2 3; do sdkm --install "${pkgs[@]}" >/tmp/sdkmanager.log 2>&1 && break; tail -20 /tmp/sdkmanager.log; sleep $((i * 15)); done
+for p in "${pkgs[@]}"; do
+  [ -f "$SDK/${p//;//}/source.properties" ] || { echo "missing $p" >&2; exit 1; }
+done
+# One adb on the box: two adb versions kill each other's server, and the
+# phone's screen (scrcpy) and zode-desktop talk to Ubuntu's.
+ln -sf /usr/bin/adb "$SDK/platform-tools/adb"
+rm -rf /tmp/sdkmanager.log /root/.android/cache "$SDK/.temp"
+chmod -R a+rwX /usr/local/lib/android
+cat > /etc/profile.d/zode-android-sdk.sh <<PROFILE
+export JAVA_HOME=$JDK ANDROID_HOME=$SDK ANDROID_SDK_ROOT=$SDK
+PROFILE
+for kv in "JAVA_HOME=$JDK" "ANDROID_HOME=$SDK" "ANDROID_SDK_ROOT=$SDK"; do
+  sed -i "/^${kv%%=*}=/d" /etc/environment
+  echo "$kv" >> /etc/environment
+done
 
 # --- 3. Android ---------------------------------------------------------------
 systemctl enable --now docker
@@ -176,6 +227,12 @@ zode/android ships:
   static build links FFmpeg (LGPL-2.1-or-later) and SDL (zlib).
 - adb from Ubuntu's adb package (AOSP source, Apache-2.0).
 - binder_linux.ko from Ubuntu's linux-modules-extra-$KVER, GPL-2.0.
+- Eclipse Temurin $TEMURIN_21_VERSION (https://adoptium.net), GPL-2.0 with the
+  Classpath Exception.
+- The Android SDK command-line tools, platforms, build-tools and platform-tools
+  under $SDK, from Google under the Android Software Development Kit License
+  Agreement, accepted at build time (sdkmanager --licenses), as on GitHub's
+  runner images. platform-tools/adb points at Ubuntu's adb.
 NOTICE
 
 # --- 4. The screen up before the freeze ---------------------------------------
@@ -430,6 +487,41 @@ if have dpkg-query; then
     fi
     add "$G" "$p" "$v"
   done
+fi
+
+# Android SDK, with the row names of GitHub's report.
+SDK=${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}
+if [ -n "$SDK" ] && [ -d "$SDK" ]; then
+  G="Android"
+  # rev DIR: Pkg.Revision of an installed SDK package.
+  rev() { sed -n 's/^Pkg\.Revision=//p' "$1/source.properties" 2>/dev/null | head -n1; }
+  # list GLOB [FORMAT]: the installed packages under GLOB, newest first.
+  list() {
+    local d out=()
+    for d in $1; do
+      [ -f "$d/source.properties" ] || continue
+      out+=("$(basename "$d")")
+    done
+    [ ${#out[@]} -gt 0 ] || return 0
+    printf '%s\n' "${out[@]}" | sort -rV | paste -sd, - | sed 's/,/, /g'
+  }
+  add "$G" "Android Command Line Tools" "$(rev "$SDK/cmdline-tools/latest")"
+  add "$G" "Android SDK Build-tools" "$(list "$SDK/build-tools/*")"
+  plats=$(for d in "$SDK"/platforms/*; do
+    [ -f "$d/source.properties" ] && printf '%s (rev %s)\n' "$(basename "$d")" "$(rev "$d")"
+  done | sort -rV | paste -sd, - | sed 's/,/, /g')
+  add "$G" "Android SDK Platforms" "$plats"
+  add "$G" "Android SDK Platform-Tools" "$(rev "$SDK/platform-tools")"
+  ndk=$(list "$SDK/ndk/*")
+  if [ -n "$ndk" ] && [ -n "${ANDROID_NDK:-}" ]; then
+    def=$(basename "$ANDROID_NDK")
+    ndk=$(printf '%s' "$ndk" | sed "s/\b$def\b/$def (default)/")
+  fi
+  add "$G" "Android NDK" "$ndk"
+  add "$G" "Android CMake" "$(list "$SDK/cmake/*")"
+  add "$G" "Android Support Repository" "$(rev "$SDK/extras/android/m2repository")"
+  add "$G" "Android Google Repository" "$(rev "$SDK/extras/google/m2repository")"
+  add "$G" "Android Google Play services" "$(rev "$SDK/extras/google/google_play_services")"
 fi
 
 # Environment worth knowing, when set.
