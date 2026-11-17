@@ -167,7 +167,7 @@ SHIM
 # distro's own copies first; any that are still missing come from Ubuntu
 # 24.04 (through the node's mirror) into /usr/local/lib/zode/voxl, which only
 # voxl sees.
-VOXL_VERSION=0.3.4-b00f3b8
+VOXL_VERSION=0.3.5-93ad2d4
 install_voxl() {
   dir=/usr/local/lib/zode/voxl
   mkdir -p "$dir"
