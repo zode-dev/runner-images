@@ -14,6 +14,18 @@ and in every size, and publishes all of them at once.
 | --- | --- | --- |
 | [`ci-ubuntu-24.04`](images/ci-ubuntu-24.04) | every CI job (`runs-on: zode-*`) | what GitHub's `ubuntu-24.04` carries that common actions and workflows use: the hosted tool cache (Node.js 22 and 24, Python 3.11 to 3.15, Go 1.24 to 1.26, Temurin 8 to 25), Maven, Gradle, PowerShell, Azure, Google Cloud and AWS CLIs, Kubernetes tools, Firefox and the browser drivers, rustup, a `runner` user with passwordless sudo, Zode's `zode-ci` test wrapper, GitHub's apt package list and kernel settings; PostgreSQL, MySQL and Redis installed but stopped. What still differs is in [PARITY.md](images/ci-ubuntu-24.04/PARITY.md) |
 | [`base`](images/base) | sandboxes that ask for `zode/base` | zstd, Git LFS, yq; PostgreSQL and Redis keep running |
+| [`ubuntu-24.04`](images/ubuntu-24.04) | `zode/ubuntu-24.04`, and old size names | nothing but the security updates since the base was built |
+
+The Linux distro lines (REQ-084) are built from each distro's own cloud
+image, not from the Zode base, so they are a different kind of line (see
+[Distro lines](#distro-lines)):
+
+| Line | Init | Browser and desktop | Built from |
+| --- | --- | --- | --- |
+| [`debian-13`](images/debian-13) | systemd | yes | Debian 13 `genericcloud` |
+| [`fedora-45`](images/fedora-45) | systemd | yes | Fedora 45 Cloud Base Generic |
+| [`arch`](images/arch) | systemd | yes | Arch Linux cloud image |
+| [`alpine-3.24`](images/alpine-3.24) | OpenRC | no (shell, Docker, headless Chromium) | Alpine 3.24 UEFI cloud-init |
 
 The Zode base image itself is Ubuntu 24.04 with Docker (Buildx, Compose),
 Node.js, pnpm, Yarn, Bun, Python, Go, Rust, the GitHub CLI, Chrome,
@@ -133,6 +145,46 @@ Lines build `FROM zode`, so each step runs in a Zode VM, not in a container:
 
 To add a line, create `images/<name>/Dockerfile.in`, render it, and merge.
 The name must match `^[a-z0-9][a-z0-9.-]{0,40}$`.
+
+## Distro lines
+
+A distro line is `images/<line>/line.conf` (the cloud image URL and its
+checksum, the init system) and `images/<line>/provision.sh` (what the line
+installs), with the shared guest steps in `scripts/guest/common.sh`: the
+zode agent under systemd or OpenRC, CPU and memory hot-plug rules, root
+growth for ext4 and btrfs, `update-ca-certificates` where the distro uses
+p11-kit, voxl for the desktop with the libraries it links, a static
+resolver, and `zode-software-report` with the distro's package list.
+
+On a node, as root:
+
+```sh
+scripts/build-base.sh debian-13              # golden debian-13-<date>, growable
+zoded serve ... --base debian-13-<date>      # every size from that one build
+scripts/matrix.sh debian-13                  # boot, exec, Docker, fork, desktop at every size
+```
+
+`build-base.sh` boots the cloud image at the smallest size with room to
+grow (16 vCPUs, virtio-mem up to 32 GB), runs the provision on the first
+boot (including the distro's full upgrade), reboots into the upgraded
+kernel, waits for the agent and snapshots disk and RAM, like
+`deploy/node/make-base.sh` in zode-dev/zoded does for the Ubuntu base. The
+`ZODE-MANIFEST` line is written on the second boot and kept next to the
+golden as `manifest.json`. `SLOT=<n>` builds several lines on one node at
+once.
+
+Distro lines have no Dockerfile, so the publish workflow does not send them
+to `POST /v1/official/releases` (that path builds `FROM zode`). Until the
+control plane takes a line recipe and builds it once per node (task 72),
+a release of a distro line is a `build-base.sh` run per node.
+
+Every Monday the [distros workflow](.github/workflows/distros.yml) moves
+each pin to its project's newest cloud image (`scripts/refresh-pins.sh`)
+and opens one pull request, and notes a new Fedora or Alpine release (a new
+line, opened by hand). With the repository variable
+`WEEKLY_UBUNTU_RELEASE=1` it also republishes `ubuntu-24.04`. Every build
+runs the distro's full upgrade, so a week-old pin still ships the week's
+security fixes.
 
 ## License
 

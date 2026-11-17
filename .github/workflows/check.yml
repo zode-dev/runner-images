@@ -24,7 +24,14 @@ jobs:
           shellcheck --version
 
       - name: shellcheck
-        run: shellcheck scripts/*.sh
+        run: |
+          shellcheck scripts/*.sh
+          # The distro lines' guest scripts are POSIX sh (Alpine has no bash
+          # until its provision installs it).
+          shellcheck -x -s sh scripts/guest/*.sh images/*/provision.sh
+
+      - name: Distro lines
+        run: scripts/check-distros.sh
 
       - name: Rendered Dockerfiles match their templates
         run: scripts/render.sh --check

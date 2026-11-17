@@ -1,0 +1,68 @@
+name: distros
+
+# Weekly security refresh of the Linux distro lines (REQ-084):
+#  - moves each distro line's cloud image pin to its project's newest build
+#    (scripts/refresh-pins.sh) and opens or updates one pull request with it;
+#  - says when a new Fedora or Alpine release is out (a new line);
+#  - with the repository variable WEEKLY_UBUNTU_RELEASE=1, republishes
+#    ubuntu-24.04 so its security-upgrade step runs again.
+# Distro lines build on the nodes with scripts/build-base.sh; every build
+# runs the distro's full upgrade, so it ships the week's fixes even when the
+# pin did not move.
+
+on:
+  schedule:
+    - cron: "17 4 * * 1" # Mondays 04:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: distros
+  cancel-in-progress: false
+
+jobs:
+  pins:
+    runs-on: zode-2x4
+    env:
+      BRANCH: bot/distro-pins
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Move the pins
+        run: scripts/refresh-pins.sh
+
+      - name: Open or update the pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git diff --quiet -- images; then
+            echo "Every pin is current"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BRANCH"
+          git add images/*/line.conf
+          git commit -q -m "distros: move the cloud image pins ($(date -u +%Y-%m-%d))"
+          git push -f origin "$BRANCH"
+          body=$(printf '%s\n\n%s\n' \
+            "The weekly refresh moved these pins to each project's newest cloud image (checksums from the project):" \
+            "$(git diff --stat HEAD~1 -- images)")
+          if [ -n "$(gh pr list --head "$BRANCH" --state open --json number --jq '.[].number')" ]; then
+            gh pr edit "$BRANCH" --body "$body"
+          else
+            gh pr create --head "$BRANCH" --base main --title "distros: move the cloud image pins" --body "$body"
+          fi
+
+  ubuntu:
+    if: vars.WEEKLY_UBUNTU_RELEASE == '1'
+    runs-on: zode-2x4
+    steps:
+      - name: Republish ubuntu-24.04
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run publish.yml --repo "$GITHUB_REPOSITORY" --ref main -f line=ubuntu-24.04
