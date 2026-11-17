@@ -72,6 +72,20 @@ jobs:
               lines=$(printf '%s\n' "$changed" | sed -nE 's#^images/([^/]+)/Dockerfile(\.in)?$#\1#p' | sort -u)
             fi
           fi
+          # A line with a HOLD file is only released when named by hand
+          # (workflow_dispatch line=<it>): images/android waits for the nodes
+          # to carry the zode-desktop that serves a phone (zoded docs/android.md).
+          if [ "$EVENT" != workflow_dispatch ] || [ -z "$INPUT_LINE" ]; then
+            keep=""
+            for l in $lines; do
+              if [ -f "images/$l/HOLD" ]; then
+                echo "::notice::$l is held, not released (remove images/$l/HOLD or dispatch it by name)"
+              else
+                keep="$keep$l"$'\n'
+              fi
+            done
+            lines=$keep
+          fi
           json=$(printf '%s\n' "$lines" | jq -Rnc '[inputs | select(length > 0)]')
           echo "lines=$json" >> "$GITHUB_OUTPUT"
           echo "Lines to release: $json"

@@ -1,0 +1,6 @@
+Not released by a push to main yet (see .github/workflows/publish.yml).
+
+zode/android needs every node's /usr/local/lib/zode/zode-desktop to be the
+build that serves a phone (zode-dev/zoded docs/android.md, tasks 74-75), and
+the owner's go for the Android line (pricing, the x86_64-only note). Release
+by hand with workflow_dispatch line=android, or delete this file.

@@ -1,0 +1,23 @@
+# android: AOSP for x86_64 in a container (redroid) on the Zode base, its
+# screen on the sandbox's desktop (`zode new --image zode/android --desktop`).
+# zode-dev/zoded docs/android.md has the design and the contract.
+#
+# The one setup step is images/android/setup.sh, inlined by scripts/render.sh
+# (Zode refuses COPY and ADD). The same script builds the image as a growable
+# golden with zoded's deploy/node/make-base.sh EXTRA=.
+FROM zode
+
+# Set by the publish workflow to the release version (YYYYMMDD.run).
+ARG IMAGE_VERSION=dev
+
+ENV ZODE_IMAGE_VERSION=${IMAGE_VERSION}
+
+# setup.sh, inlined by scripts/render.sh. It loads the binder module and mounts
+# binderfs: this is a VM, not a container.
+# hadolint ignore=DL3001
+@INLINE_STEP images/android/setup.sh@
+
+@SOFTWARE_REPORT_STEP@
+
+# Last step: print the software manifest (one ZODE-MANIFEST line).
+RUN /usr/local/bin/zode-software-report
