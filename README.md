@@ -66,6 +66,7 @@ them after every release.
 | --- | --- | --- | --- | --- |
 | `base` | `zode/base` | 20261112.4 | 2026-11-12 | [images/base](images/base/README.md) |
 | `ci-ubuntu-24.04` | `zode/ci-ubuntu-24.04` | 20261113.15 | 2026-11-13 | [images/ci-ubuntu-24.04](images/ci-ubuntu-24.04/README.md) |
+| `ubuntu-24.04` | `zode/ubuntu-24.04` | 20261117.20 | 2026-11-17 | [images/ubuntu-24.04](images/ubuntu-24.04/README.md) |
 <!-- software:end -->
 
 ## Parity with GitHub's image
