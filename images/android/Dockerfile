@@ -33,6 +33,11 @@ RUN <<'ZODE_STEP'
 #   - the desktop switched on, so the image is frozen with the screen up
 set -euxo pipefail
 
+# The build VM's own unattended-upgrades can hold the apt lock (the first
+# release, 17 Nov 2026, timed out on it): every apt call waits for the lock
+# instead of failing. Kept in the image, where it only makes apt patient.
+printf 'DPkg::Lock::Timeout "600";\n' > /etc/apt/apt.conf.d/90zode-lock-timeout
+
 # Android 15 (redroid 15.0.0-250627, x86_64 + x86). Android 16 (16.0.0-250627,
 # sha256:d89f5204...) was tried on 17 Nov 2026 and does not boot with software
 # rendering: SurfaceFlinger aborts in primeShaderCache ("output buffer not gpu
