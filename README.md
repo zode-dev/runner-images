@@ -15,6 +15,7 @@ and in every size, and publishes all of them at once.
 | [`ci-ubuntu-24.04`](images/ci-ubuntu-24.04) | every CI job (`runs-on: zode-*`) | what GitHub's `ubuntu-24.04` carries that common actions and workflows use: the hosted tool cache (Node.js 22 and 24, Python 3.11 to 3.15, Go 1.24 to 1.26, Temurin 8 to 25), Maven, Gradle, PowerShell, Azure, Google Cloud and AWS CLIs, Kubernetes tools, Firefox and the browser drivers, rustup, a `runner` user with passwordless sudo, Zode's `zode-ci` test wrapper, GitHub's apt package list and kernel settings; PostgreSQL, MySQL and Redis installed but stopped. What still differs is in [PARITY.md](images/ci-ubuntu-24.04/PARITY.md) |
 | [`base`](images/base) | sandboxes that ask for `zode/base` | zstd, Git LFS, yq; PostgreSQL and Redis keep running |
 | [`ubuntu-24.04`](images/ubuntu-24.04) | `zode/ubuntu-24.04`, and old size names | nothing but the security updates since the base was built |
+| [`android`](images/android) | sandboxes that ask for `zode/android` (held, not released yet) | Android (AOSP x86_64/x86 in a container, redroid), adb and scrcpy; its screen is the sandbox desktop. No Google Play, no ARM translation |
 
 The Linux distro lines (REQ-084) are built from each distro's own cloud
 image, not from the Zode base, so they are a different kind of line (see
