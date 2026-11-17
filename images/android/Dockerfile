@@ -185,7 +185,8 @@ NOTICE
 # this: the screen then comes up on the first `zode desktop` instead of
 # being frozen up, which only costs start time.
 H=/usr/local/lib/zode/zode-desktop
-if [ -x "$H" ] && { "$H" 2>&1 || true; } | grep -q 'android VERB'; then
+helper_usage=$( { [ -x "$H" ] && "$H" 2>&1; } || true)
+if [[ "$helper_usage" == *"android VERB"* ]]; then
   "$H" enable desktop
   "$H" android status
 else
