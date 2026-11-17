@@ -64,6 +64,7 @@ them after every release.
 <!-- software:start -->
 | Line | Use it with | Version | Published | Software |
 | --- | --- | --- | --- | --- |
+| `android` | `zode/android` | 20261117.23 | 2026-11-17 | [images/android](images/android/README.md) |
 | `base` | `zode/base` | 20261112.4 | 2026-11-12 | [images/base](images/base/README.md) |
 | `ci-ubuntu-24.04` | `zode/ci-ubuntu-24.04` | 20261113.15 | 2026-11-13 | [images/ci-ubuntu-24.04](images/ci-ubuntu-24.04/README.md) |
 | `ubuntu-24.04` | `zode/ubuntu-24.04` | 20261117.20 | 2026-11-17 | [images/ubuntu-24.04](images/ubuntu-24.04/README.md) |
