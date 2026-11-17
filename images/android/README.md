@@ -1,6 +1,6 @@
 # android
 
-Use it with `zode/android`. Version 20261117.23, published 2026-11-17 from commit [10e2a70](https://github.com/zode-dev/runner-images/tree/10e2a7004d8c60ecebf630e79c90029646afbc8f/images/android).
+Use it with `zode/android`. Version 20261117.24, published 2026-11-17 from commit [c8e4709](https://github.com/zode-dev/runner-images/tree/c8e470914089aaf46f5ddce640f78fb022a1fff4/images/android).
 Sizes: 2x4, 4x8, 8x16, 16x32.
 
 Operating system: Ubuntu 24.04.5 LTS.
@@ -138,5 +138,5 @@ Written by the publish workflow from the software report in the image
 | Name | Value |
 | --- | --- |
 | `CHROME_PATH` | `/usr/bin/google-chrome` |
-| `ZODE_IMAGE_VERSION` | `20261117.23` |
+| `ZODE_IMAGE_VERSION` | `20261117.24` |
 | `PLAYWRIGHT_BROWSERS_PATH` | `/ms-playwright` |
