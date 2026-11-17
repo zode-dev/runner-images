@@ -20,8 +20,11 @@ ENV ZODE_IMAGE_VERSION=${IMAGE_VERSION}
 RUN <<'ZODE_STEP'
 set -euxo pipefail
 export DEBIAN_FRONTEND=noninteractive
-for i in 1 2 3 4 5; do apt-get update && break; sleep $((i * 10)); done
-apt-get -y -o Dpkg::Options::=--force-confold upgrade
+# The build VM's own unattended-upgrades can hold the apt lock when this
+# runs (publish of 17 Nov 2026 failed on it): wait for the lock instead of
+# failing. The timers stay on, so sandboxes keep their security updates.
+for i in 1 2 3 4 5; do apt-get -o DPkg::Lock::Timeout=600 update && break; sleep $((i * 10)); done
+apt-get -y -o DPkg::Lock::Timeout=600 -o Dpkg::Options::=--force-confold upgrade
 apt-get clean
 rm -rf /var/lib/apt/lists/*
 ZODE_STEP
