@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 # Creates a release of one line on Zode and follows it until it is published
-# or failed. Runs in the publish workflow on main: the API only takes a
-# GitHub Actions OIDC token from zode-dev/runner-images at refs/heads/main.
+# or failed. A Dockerfile line (images/<line>/Dockerfile) is sent as its
+# Dockerfile; a distro line (images/<line>/line.conf + provision.sh) as its
+# recipe: the cloud image pin, the init and the guest scripts, which each
+# node builds from the distro's cloud image (zoded internal/zoded/recipe.go).
+# Runs in the publish workflow on main: the API only takes a GitHub Actions
+# OIDC token from zode-dev/runner-images at refs/heads/main.
 #
 #   scripts/release.sh LINE VERSION
 #
@@ -21,14 +25,31 @@ TIMEOUT=${TIMEOUT_SECONDS:-10800}
 DOCKERFILE=images/$LINE/Dockerfile
 
 cd "$(dirname "$0")/.."
-[ -f "$DOCKERFILE" ] || { echo "no $DOCKERFILE" >&2; exit 1; }
-grep -qE '^ARG IMAGE_VERSION=' "$DOCKERFILE" || { echo "$DOCKERFILE has no ARG IMAGE_VERSION=" >&2; exit 1; }
+CONF=images/$LINE/line.conf
+if [ -f "$CONF" ]; then
+  KIND=recipe
+else
+  KIND=dockerfile
+  [ -f "$DOCKERFILE" ] || { echo "no $DOCKERFILE or $CONF" >&2; exit 1; }
+  grep -qE '^ARG IMAGE_VERSION=' "$DOCKERFILE" || { echo "$DOCKERFILE has no ARG IMAGE_VERSION=" >&2; exit 1; }
+fi
 
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 
-# The Dockerfile as sent: the release version stamped into ARG IMAGE_VERSION.
-sed -E "s/^ARG IMAGE_VERSION=.*/ARG IMAGE_VERSION=$VERSION/" "$DOCKERFILE" >"$work/Dockerfile"
+if [ "$KIND" = dockerfile ]; then
+  # The Dockerfile as sent: the release version stamped into ARG IMAGE_VERSION.
+  sed -E "s/^ARG IMAGE_VERSION=.*/ARG IMAGE_VERSION=$VERSION/" "$DOCKERFILE" >"$work/Dockerfile"
+else
+  # The recipe as sent (scripts/check-distros.sh checked its shape).
+  conf() { sed -n "s/^$1=//p" "$CONF" | tr -d '"'; }
+  jq -n --arg line "$LINE" --arg init "$(conf INIT)" --arg url "$(conf CLOUD_IMAGE_URL)" --arg sum "$(conf CLOUD_IMAGE_SUM)" \
+    --rawfile provision "images/$LINE/provision.sh" --rawfile common scripts/guest/common.sh \
+    --rawfile distro scripts/guest/distro-report.sh --rawfile report scripts/software-report.sh \
+    '{line: $line, init: $init, cloud_image_url: $url, cloud_image_sum: $sum,
+      files: {"provision.sh": $provision, "common.sh": $common, "distro-report.sh": $distro, "software-report.sh": $report}}' \
+    >"$work/recipe.json"
+fi
 
 # GitHub Actions OIDC token for the Zode API.
 : "${ACTIONS_ID_TOKEN_REQUEST_URL:?the job needs permissions: id-token: write}"
@@ -38,9 +59,14 @@ token=$(curl -fsS --retry 3 -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_
 if [ -z "$token" ] || [ "$token" = null ]; then echo "no OIDC token" >&2; exit 1; fi
 echo "::add-mask::$token"
 
-jq -n --arg line "$LINE" --arg version "$VERSION" --arg commit "${GITHUB_SHA:-$(git rev-parse HEAD)}" \
-  --rawfile dockerfile "$work/Dockerfile" \
-  '{line: $line, version: $version, dockerfile: $dockerfile, commit: $commit}' >"$work/request.json"
+commit=${GITHUB_SHA:-$(git rev-parse HEAD)}
+if [ "$KIND" = dockerfile ]; then
+  jq -n --arg line "$LINE" --arg version "$VERSION" --arg commit "$commit" --rawfile dockerfile "$work/Dockerfile" \
+    '{line: $line, version: $version, dockerfile: $dockerfile, commit: $commit}' >"$work/request.json"
+else
+  jq -n --arg line "$LINE" --arg version "$VERSION" --arg commit "$commit" --slurpfile recipe "$work/recipe.json" \
+    '{line: $line, version: $version, recipe: $recipe[0], commit: $commit}' >"$work/request.json"
+fi
 
 code=$(curl -sS -o "$work/created.json" -w '%{http_code}' -X POST "$API/v1/official/releases" \
   -H "Authorization: Bearer $token" -H 'Content-Type: application/json' --data-binary "@$work/request.json")

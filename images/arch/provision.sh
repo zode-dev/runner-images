@@ -14,7 +14,7 @@ retry pacman -S --noconfirm --needed \
   ca-certificates curl wget gnupg git jq unzip zip xz zstd ripgrep fd tree \
   base-devel pkgconf openssl cmake binutils \
   python python-pip python-pipx nodejs npm go \
-  sqlite iproute2 iputils bind openbsd-netcat openssh sudo \
+  sqlite iproute2 iputils inetutils bind openbsd-netcat openssh sudo \
   vim nano less tmux htop lsof strace cloud-guest-utils btrfs-progs e2fsprogs \
   docker docker-buildx docker-compose
 retry pacman -S --noconfirm --needed \
