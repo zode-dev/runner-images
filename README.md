@@ -66,7 +66,8 @@ them after every release.
 | --- | --- | --- | --- | --- |
 | `android` | `zode/android` | 20261117.24 | 2026-11-17 | [images/android](images/android/README.md) |
 | `base` | `zode/base` | 20261112.4 | 2026-11-12 | [images/base](images/base/README.md) |
-| `ci-ubuntu-24.04` | `zode/ci-ubuntu-24.04` | 20261113.15 | 2026-11-13 | [images/ci-ubuntu-24.04](images/ci-ubuntu-24.04/README.md) |
+| `ci-ubuntu-24.04` | `zode/ci-ubuntu-24.04` | 20261117.25 | 2026-11-17 | [images/ci-ubuntu-24.04](images/ci-ubuntu-24.04/README.md) |
+| `debian-13` | `zode/debian-13` | 20261118.28 | 2026-11-18 | [images/debian-13](images/debian-13/README.md) |
 | `ubuntu-24.04` | `zode/ubuntu-24.04` | 20261117.20 | 2026-11-17 | [images/ubuntu-24.04](images/ubuntu-24.04/README.md) |
 <!-- software:end -->
 
