@@ -1,6 +1,6 @@
 # android
 
-Use it with `zode/android`. Version 20261117.24, published 2026-11-17 from commit [c8e4709](https://github.com/zode-dev/runner-images/tree/c8e470914089aaf46f5ddce640f78fb022a1fff4/images/android).
+Use it with `zode/android`. Version 20261118.29, published 2026-11-18 from commit [1c2d28b](https://github.com/zode-dev/runner-images/tree/1c2d28b6fedb2c7029ebfc2e267535b5832fdf02/images/android).
 Sizes: 2x4, 4x8, 8x16, 16x32.
 
 Operating system: Ubuntu 24.04.5 LTS.
@@ -26,6 +26,7 @@ Written by the publish workflow from the software report in the image
 | Dash | 0.5.12-6ubuntu5 |
 | GCC | 13.3.0 |
 | Go | 1.27.3 |
+| Java | 21.0.13 |
 | Node.js | 22.23.4 |
 | Perl | 5.38.2 |
 | Python | 3.12.3 |
@@ -38,7 +39,7 @@ Written by the publish workflow from the software report in the image
 | Name | Version |
 | --- | --- |
 | npm | 10.9.9 |
-| pnpm | 12.18.0 |
+| pnpm | 12.21.0 |
 | Yarn | 1.22.22 |
 | Bun | 1.4.4 |
 | pip | 24.0 |
@@ -133,10 +134,22 @@ Written by the publish workflow from the software report in the image
 | xz-utils | 5.6.1+really5.4.5-1ubuntu0.4 |
 | zip | 3.0-13ubuntu0.2 |
 
+### Android
+
+| Name | Version |
+| --- | --- |
+| Android Command Line Tools | 12.0 |
+| Android SDK Build-tools | 36.0.0, 35.0.0 |
+| Android SDK Platforms | android-36 (rev 2), android-35 (rev 2) |
+| Android SDK Platform-Tools | 37.0.1 |
+
 ### Environment
 
 | Name | Value |
 | --- | --- |
+| `JAVA_HOME` | `/usr/lib/jvm/temurin-21-jdk-amd64` |
 | `CHROME_PATH` | `/usr/bin/google-chrome` |
-| `ZODE_IMAGE_VERSION` | `20261117.24` |
+| `ANDROID_HOME` | `/usr/local/lib/android/sdk` |
+| `ANDROID_SDK_ROOT` | `/usr/local/lib/android/sdk` |
+| `ZODE_IMAGE_VERSION` | `20261118.29` |
 | `PLAYWRIGHT_BROWSERS_PATH` | `/ms-playwright` |
