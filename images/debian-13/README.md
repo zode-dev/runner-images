@@ -1,6 +1,6 @@
 # debian-13
 
-Use it with `zode/debian-13`. Version 20261118.28, published 2026-11-18 from commit [1c2d28b](https://github.com/zode-dev/runner-images/tree/1c2d28b6fedb2c7029ebfc2e267535b5832fdf02/images/debian-13).
+Use it with `zode/debian-13`. Version 20261120.36, published 2026-11-20 from commit [54c7d84](https://github.com/zode-dev/runner-images/tree/54c7d84b034e92f6809cca5f737e222970cfe8bc/images/debian-13).
 Sizes: 2x4, 4x8, 8x16, 16x32.
 
 Operating system: Debian GNU/Linux 13 (trixie).
@@ -142,7 +142,7 @@ Written by the publish workflow from the software report in the image
 
 | Name | Version |
 | --- | --- |
-| zode-agent | bd49df075a7a |
+| zode-agent | 8050af3cfeff |
 
 ### Environment
 

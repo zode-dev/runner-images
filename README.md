@@ -68,7 +68,7 @@ them after every release.
 | `arch` | `zode/arch` | 20261120.36 | 2026-11-20 | [images/arch](images/arch/README.md) |
 | `base` | `zode/base` | 20261120.36 | 2026-11-20 | [images/base](images/base/README.md) |
 | `ci-ubuntu-24.04` | `zode/ci-ubuntu-24.04` | 20261120.36 | 2026-11-20 | [images/ci-ubuntu-24.04](images/ci-ubuntu-24.04/README.md) |
-| `debian-13` | `zode/debian-13` | 20261118.28 | 2026-11-18 | [images/debian-13](images/debian-13/README.md) |
+| `debian-13` | `zode/debian-13` | 20261120.36 | 2026-11-20 | [images/debian-13](images/debian-13/README.md) |
 | `fedora-45` | `zode/fedora-45` | 20261118.30 | 2026-11-18 | [images/fedora-45](images/fedora-45/README.md) |
 | `ubuntu-24.04` | `zode/ubuntu-24.04` | 20261118.33 | 2026-11-18 | [images/ubuntu-24.04](images/ubuntu-24.04/README.md) |
 <!-- software:end -->
