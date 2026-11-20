@@ -1,6 +1,6 @@
 # ubuntu-24.04
 
-Use it with `zode/ubuntu-24.04`. Version 20261118.33, published 2026-11-18 from commit [2a4d14f](https://github.com/zode-dev/runner-images/tree/2a4d14ff55fd83e59dd88bf60026fccb46e22dbd/images/ubuntu-24.04).
+Use it with `zode/ubuntu-24.04`. Version 20261120.36, published 2026-11-20 from commit [54c7d84](https://github.com/zode-dev/runner-images/tree/54c7d84b034e92f6809cca5f737e222970cfe8bc/images/ubuntu-24.04).
 Sizes: 2x4, 4x8, 8x16, 16x32.
 
 Operating system: Ubuntu 24.04.5 LTS.
@@ -40,7 +40,7 @@ Written by the publish workflow from the software report in the image
 | npm | 10.9.9 |
 | pnpm | 12.21.0 |
 | Yarn | 1.22.22 |
-| Bun | 1.4.4 |
+| Bun | 1.4.5 |
 | pip | 24.0 |
 | pipx | 1.4.3 |
 | Cargo | 1.99.1 |
@@ -138,5 +138,5 @@ Written by the publish workflow from the software report in the image
 | Name | Value |
 | --- | --- |
 | `CHROME_PATH` | `/usr/bin/google-chrome` |
-| `ZODE_IMAGE_VERSION` | `20261118.33` |
+| `ZODE_IMAGE_VERSION` | `20261120.36` |
 | `PLAYWRIGHT_BROWSERS_PATH` | `/ms-playwright` |
