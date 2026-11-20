@@ -1,6 +1,6 @@
 # arch
 
-Use it with `zode/arch`. Version 20261118.31, published 2026-11-18 from commit [ceec83d](https://github.com/zode-dev/runner-images/tree/ceec83dd9232a6e6fdaafce20875382b5b8475b6/images/arch).
+Use it with `zode/arch`. Version 20261120.36, published 2026-11-20 from commit [54c7d84](https://github.com/zode-dev/runner-images/tree/54c7d84b034e92f6809cca5f737e222970cfe8bc/images/arch).
 Sizes: 2x4, 4x8, 8x16, 16x32.
 
 Operating system: Arch Linux.
@@ -15,7 +15,7 @@ Written by the publish workflow from the software report in the image
 | Name | Version |
 | --- | --- |
 | OS | Arch Linux |
-| Kernel | 7.3.4-arch1-2 |
+| Kernel | 7.3.5-arch1-1 |
 | systemd | 262 |
 
 ### Languages and runtimes
@@ -33,7 +33,7 @@ Written by the publish workflow from the software report in the image
 
 | Name | Version |
 | --- | --- |
-| npm | 12.2.2 |
+| npm | 12.2.3 |
 | pip | 26.2.2 |
 | pipx | 1.18.4 |
 
@@ -41,16 +41,16 @@ Written by the publish workflow from the software report in the image
 
 | Name | Version |
 | --- | --- |
-| CMake | 4.5.0 |
+| CMake | 4.5.1 |
 
 ### Containers
 
 | Name | Version |
 | --- | --- |
-| Docker client | 29.9.3 |
-| Docker server | 29.9.3 |
+| Docker client | 29.10.0 |
+| Docker server | 29.10.0 |
 | Docker Buildx | 0.39.0 |
-| Docker Compose | 5.7.1 |
+| Docker Compose | 5.8.0 |
 
 ### Tools
 
@@ -73,7 +73,7 @@ Written by the publish workflow from the software report in the image
 
 | Name | Version |
 | --- | --- |
-| ChromeDriver | 157.0.8103.78 |
+| ChromeDriver | 158.0.8127.36 |
 
 ### Installed packages
 
@@ -81,19 +81,19 @@ Written by the publish workflow from the software report in the image
 | --- | --- |
 | bash | 5.3.20-1 |
 | ca-certificates | 20240618-1 |
-| chromium | 157.0.8103.78-1 |
+| chromium | 158.0.8127.36-1 |
 | coreutils | 9.12-3 |
 | curl | 8.23.0-2 |
-| docker | 1:29.9.3-1 |
+| docker | 1:29.10.0-1 |
 | docker-buildx | 0.39.0-1 |
-| docker-compose | 5.7.1-1 |
+| docker-compose | 5.8.0-1 |
 | gcc | 16.2.1+r23+gd564253eb6c8-1 |
 | git | 2.56.1-1 |
 | glibc | 2.44+r78+gfcfb867c58ab-1 |
 | iproute2 | 7.3.0-1 |
-| linux | 7.3.4.arch1-2 |
-| nodejs | 26.13.1-1 |
-| npm | 12.2.2-1 |
+| linux | 7.3.5.arch1-1 |
+| nodejs | 26.13.1-2 |
+| npm | 12.2.3-1 |
 | openssh | 10.6p2-1 |
 | openssl | 4.1.0-1 |
 | python | 3.14.10-1 |
@@ -108,7 +108,7 @@ Written by the publish workflow from the software report in the image
 
 | Name | Version |
 | --- | --- |
-| zode-agent | bd49df075a7a |
+| zode-agent | 8050af3cfeff |
 
 ### Environment
 
