@@ -1,6 +1,6 @@
 # fedora-45
 
-Use it with `zode/fedora-45`. Version 20261118.30, published 2026-11-18 from commit [a2341f7](https://github.com/zode-dev/runner-images/tree/a2341f774f3d4d9379f6053096bdd8d97ece6e33/images/fedora-45).
+Use it with `zode/fedora-45`. Version 20261120.36, published 2026-11-20 from commit [54c7d84](https://github.com/zode-dev/runner-images/tree/54c7d84b034e92f6809cca5f737e222970cfe8bc/images/fedora-45).
 Sizes: 2x4, 4x8, 8x16, 16x32.
 
 Operating system: Fedora Linux 45 (Cloud Edition).
@@ -51,7 +51,7 @@ Written by the publish workflow from the software report in the image
 | Docker server | 29.9.3 |
 | Docker Buildx | 0.38.2 |
 | Docker Compose | 5.7.0 |
-| Podman | 6.1.3 |
+| Podman | 6.2.0 |
 
 ### Tools
 
@@ -105,7 +105,7 @@ Written by the publish workflow from the software report in the image
 
 | Name | Version |
 | --- | --- |
-| zode-agent | bd49df075a7a |
+| zode-agent | 8050af3cfeff |
 
 ### Environment
 
