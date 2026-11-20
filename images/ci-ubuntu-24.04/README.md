@@ -1,6 +1,6 @@
 # ci-ubuntu-24.04
 
-Use it with `zode/ci-ubuntu-24.04`. Version 20261113.15, published 2026-11-13 from commit [70bc261](https://github.com/zode-dev/runner-images/tree/70bc2616ba86f07c15b104392548eacf5fff695c/images/ci-ubuntu-24.04).
+Use it with `zode/ci-ubuntu-24.04`. Version 20261120.36, published 2026-11-20 from commit [54c7d84](https://github.com/zode-dev/runner-images/tree/54c7d84b034e92f6809cca5f737e222970cfe8bc/images/ci-ubuntu-24.04).
 Sizes: 2x4, 4x8, 8x16, 16x32.
 
 Operating system: Ubuntu 24.04.5 LTS.
@@ -16,7 +16,7 @@ Written by the publish workflow from the software report in the image
 | --- | --- |
 | OS | Ubuntu 24.04.5 LTS |
 | Kernel | 6.8.0-147-generic |
-| systemd | 255.4-1ubuntu8.18 |
+| systemd | 255.4-1ubuntu8.19 |
 
 ### Languages and runtimes
 
@@ -45,9 +45,9 @@ Written by the publish workflow from the software report in the image
 | Name | Version |
 | --- | --- |
 | npm | 10.9.9 |
-| pnpm | 12.18.0 |
+| pnpm | 12.21.0 |
 | Yarn | 1.22.22 |
-| Bun | 1.4.4 |
+| Bun | 1.4.5 |
 | pip | 24.0 |
 | pipx | 1.4.3 |
 | RubyGems | 3.4.20 |
@@ -205,7 +205,7 @@ Written by the publish workflow from the software report in the image
 | sshpass | 1.09-1 |
 | sudo | 1.9.15p5-3ubuntu5.24.04.4 |
 | swig | 4.2.0-2ubuntu1 |
-| systemd-coredump | 255.4-1ubuntu8.18 |
+| systemd-coredump | 255.4-1ubuntu8.19 |
 | tar | 1.35+dfsg-3ubuntu0.4 |
 | telnet | 0.17+2.5-3ubuntu4.2 |
 | texinfo | 7.1-3build2 |
@@ -221,6 +221,20 @@ Written by the publish workflow from the software report in the image
 | zip | 3.0-13ubuntu0.2 |
 | zsync | 0.6.2-5build1 |
 
+### Android
+
+| Name | Version |
+| --- | --- |
+| Android Command Line Tools | 12.0 |
+| Android SDK Build-tools | 37.0.0, 36.1.0, 36.0.0, 35.0.1, 35.0.0, 34.0.0 |
+| Android SDK Platforms | android-37.2-beta3 (rev 3), android-37.2-beta2 (rev 2), android-37.2-beta1 (rev 1), android-37.2 (rev 2), android-37.1 (rev 1), android-37.0 (rev 2), android-36.1 (rev 1), android-36-ext19 (rev 1), android-36-ext18 (rev 1), android-36 (rev 2), android-35-ext15 (rev 1), android-35-ext14 (rev 1), android-35 (rev 2), android-34-ext12 (rev 1), android-34-ext11 (rev 1), android-34-ext10 (rev 1), android-34-ext8 (rev 1), android-34 (rev 3) |
+| Android SDK Platform-Tools | 37.0.3 |
+| Android NDK | 30.0.16248370, 29.0.14206865, 27.3.13750724 (default) |
+| Android CMake | 4.1.2, 3.31.5 |
+| Android Support Repository | 47.0.0 |
+| Android Google Repository | 58 |
+| Android Google Play services | 49 |
+
 ### Environment
 
 | Name | Value |
@@ -229,15 +243,20 @@ Written by the publish workflow from the software report in the image
 | `JAVA_HOME` | `/usr/lib/jvm/temurin-17-jdk-amd64` |
 | `CARGO_HOME` | `/home/runner/.cargo` |
 | `ACCEPT_EULA` | `Y` |
+| `ANDROID_NDK` | `/usr/local/lib/android/sdk/ndk/27.3.13750724` |
 | `CHROME_PATH` | `/usr/bin/google-chrome` |
 | `RUSTUP_HOME` | `/home/runner/.rustup` |
-| `ImageVersion` | `20261113.15` |
+| `ANDROID_HOME` | `/usr/local/lib/android/sdk` |
+| `ImageVersion` | `20261120.36` |
 | `GECKOWEBDRIVER` | `/usr/local/share/gecko_driver` |
 | `CHROMEWEBDRIVER` | `/usr/local/share/chromedriver-linux64` |
 | `GOROOT_1_24_X64` | `/opt/hostedtoolcache/go/1.24.13/x64` |
 | `GOROOT_1_25_X64` | `/opt/hostedtoolcache/go/1.25.14/x64` |
 | `GOROOT_1_26_X64` | `/opt/hostedtoolcache/go/1.26.11/x64` |
 | `JAVA_HOME_8_X64` | `/usr/lib/jvm/temurin-8-jdk-amd64` |
+| `ANDROID_NDK_HOME` | `/usr/local/lib/android/sdk/ndk/27.3.13750724` |
+| `ANDROID_NDK_ROOT` | `/usr/local/lib/android/sdk/ndk/27.3.13750724` |
+| `ANDROID_SDK_ROOT` | `/usr/local/lib/android/sdk` |
 | `JAVA_HOME_11_X64` | `/usr/lib/jvm/temurin-11-jdk-amd64` |
 | `JAVA_HOME_17_X64` | `/usr/lib/jvm/temurin-17-jdk-amd64` |
 | `JAVA_HOME_21_X64` | `/usr/lib/jvm/temurin-21-jdk-amd64` |
@@ -245,4 +264,5 @@ Written by the publish workflow from the software report in the image
 | `RUNNER_TOOL_CACHE` | `/opt/hostedtoolcache` |
 | `SELENIUM_JAR_PATH` | `/usr/share/java/selenium-server.jar` |
 | `AGENT_TOOLSDIRECTORY` | `/opt/hostedtoolcache` |
+| `ANDROID_NDK_LATEST_HOME` | `/usr/local/lib/android/sdk/ndk/30.0.16248370` |
 | `PLAYWRIGHT_BROWSERS_PATH` | `/ms-playwright` |
