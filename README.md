@@ -70,7 +70,7 @@ them after every release.
 | `ci-ubuntu-24.04` | `zode/ci-ubuntu-24.04` | 20261120.36 | 2026-11-20 | [images/ci-ubuntu-24.04](images/ci-ubuntu-24.04/README.md) |
 | `debian-13` | `zode/debian-13` | 20261120.36 | 2026-11-20 | [images/debian-13](images/debian-13/README.md) |
 | `fedora-45` | `zode/fedora-45` | 20261120.36 | 2026-11-20 | [images/fedora-45](images/fedora-45/README.md) |
-| `ubuntu-24.04` | `zode/ubuntu-24.04` | 20261120.36 | 2026-11-20 | [images/ubuntu-24.04](images/ubuntu-24.04/README.md) |
+| `ubuntu-24.04` | `zode/ubuntu-24.04` | 20261121.39 | 2026-11-21 | [images/ubuntu-24.04](images/ubuntu-24.04/README.md) |
 <!-- software:end -->
 
 ## Parity with GitHub's image
